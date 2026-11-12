@@ -55,10 +55,16 @@ Trace của case H7 có hai tool calls:
 
 Hai lần chạy dùng cùng cấu hình: provider `openai`, model agent và judge `gpt-4o-mini`, `max_steps` bằng 8, dataset `core`. Cả hai đều chấm đủ 22 case. Điểm tổng tăng 6.00 điểm; 12 case tăng điểm, 5 case giảm và 5 case không đổi.
 
-- **H7:** điểm tăng từ 60 lên 65, nhưng lỗi chưa được khắc phục hoàn toàn. Agent nói không thể xác minh Cloudflare do timeout, rồi vẫn thêm câu “nếu dịch vụ không truy cập được, trạng thái có thể được coi là hoạt động bình thường”. Câu này vẫn là kết luận không có bằng chứng.
-- **H8:** tăng từ 75 lên 90. Agent từ chối liệt kê toàn bộ lịch sử và nêu giới hạn 50 incident gần nhất, tối đa 5 kết quả trả về. Lần chạy riêng H8 cũng đạt 90.
-- **H6:** tăng từ 60 lên 75. Trace đọc incident liên quan `xr3myzj7ms51` ở step 2. Câu trả lời cần phân biệt rõ nguyên nhân được ghi trong incident gộp với nguyên nhân riêng của incident ban đầu.
-- Một số case giảm điểm gồm E6 (85 xuống 70), E5 (75 xuống 65), A7 (75 xuống 65), E3 (80 xuống 75) và H3 (95 xuống 90). Với A7, câu trả lời nói có thể có mối liên hệ giữa incident Phoenix và lỗi tại Việt Nam dù chưa có bằng chứng; với E5, judge lưu ý thời gian và việc dữ liệu năm 2026 không trả lời đầy đủ yêu cầu.
+- Lỗi đã giải quyết:
+  - Case H2: lần chạy toàn bộ mới đạt 100 điểm. Trace có cả `get_incident_details` và `get_status`, nên câu trả lời phân biệt được incident đã resolved với trạng thái hiện tại của GitHub Actions.
+  - Case E2: đạt 100 điểm. Agent đọc chi tiết incident `wp49bp8bqo6c` và nêu đúng rằng update chỉ rõ khách hàng non-FedRAMP không bị ảnh hưởng bởi incident này.
+  - Case H8: tăng từ 75 lên 90 điểm. Agent nói rõ không thể đảm bảo danh sách đầy đủ, do công cụ chỉ tìm trong 50 incident gần nhất và trả tối đa 5 kết quả.
+  - Case H6: tăng từ 60 lên 75 điểm. Trace cho thấy agent đọc incident liên quan `xr3myzj7ms51` ở model step tiếp theo và trích nguyên nhân từ incident đó.
+
+- Lỗi còn lại hoặc mới xuất hiện:
+  - Case H1 vẫn được 60 điểm. Agent gọi incident GitHub `h02n9572mx9y` và incident Cloudflare `yaa0witbl2me` cùng ở step 1, nhưng không gọi tool đọc incident GitHub `xr3myzj7ms51` được dẫn trong update. Mechanical check yêu cầu tool calls ở ít nhất hai model steps.
+  - Case H7 tăng từ 60 lên 65 điểm nhưng lỗi chưa hết: dù nói không thể xác minh Cloudflare do timeout, agent vẫn thêm rằng trạng thái có thể được coi là operational. Timeout không chứng minh trạng thái dịch vụ.
+  - Một số điểm giảm so với lần chạy đầu: E6 từ 85 xuống 70, E5 từ 75 xuống 65, A7 từ 75 xuống 65, E3 từ 80 xuống 75 và H3 từ 95 xuống 90. Cần đối chiếu trace và expected của từng case; điểm LLM judge có thể dao động và không phải nhận định nào của judge cũng chính xác.
 
 ## 5. Giới hạn
 
